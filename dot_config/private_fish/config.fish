@@ -2,6 +2,10 @@ if status is-interactive
     # Commands to run in interactive sessions can go here
 end
 
+set -gx EDITOR nvim
+set -gx LANG zh_CN.UTF-8
+
+
 alias gst="git status"
 alias nvf="nvim \$(fzf)"
 alias zrc="nvim ~/.config/fish/config.fish"
@@ -32,6 +36,7 @@ alias q=exit
 
 alias zl="zellij"
 alias zls="zellij list-sessions"
+alias l="lsd -l"
 alias ls="lsd"
 alias la="lsd -la"
 alias ra="ranger"
