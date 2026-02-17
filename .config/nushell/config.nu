@@ -1,6 +1,5 @@
 $env.config.show_banner = false
 
-
 $env.PROMPT_COMMAND = {||
     let username = $"(ansi yellow)(whoami)(ansi reset)"
 
@@ -23,6 +22,10 @@ $env.PROMPT_COMMAND = {||
 $env.EDITOR = "nvim"
 $env.config.buffer_editor = "nvim"
 
+# fix ssh git@github.com ??? why that works
+# whatever anyway it works
+$env.__NV_DISABLE_EXPLICIT_SYNC = 1
+
 alias q = exit
 alias zed = zeditor
 alias sps = sudo pacman -S
@@ -43,9 +46,6 @@ alias dots = /usr/bin/git --git-dir=$"($env.HOME)/.dotfiles/" --work-tree=$"($en
 
 use std/util "path add"
 
-path add "~/.opam/default/bin/"
-path add "~/.ghcup/bin/"
-path add "~/.elan/bin/"
 
 
 
@@ -62,29 +62,41 @@ def --env y [...args] {
 
 
 
+def check-install-and-then [program : string, if_then?: closure, if_fail?: closure] {
+  if (which $program | is-empty ) {
+    print -e $"(ansi red)<!> (ansi green)($program)(ansi yellow) is not installed(ansi reset)"
+    do $if_fail
+  } else {
+    do $if_then
+  }
+}
 
-# Source - https://stackoverflow.com/a
-# Posted by Tyarel, modified by community. See post 'Timeline' for change history
-# Retrieved 2026-01-05, License - CC BY-SA 4.0
-opam env --shell=powershell | parse "$env:{key} = '{val}'" | transpose -rd | load-env
+check-install-and-then "opam" { ||
+  opam env --shell=powershell | parse "$env:{key} = '{val}'" | transpose -rd | load-env
+  path add "~/.opam/default/bin/"
+}
 
+check-install-and-then "zoxide" { ||
+  source ~/.zoxide.nu
+}
 
-# fix ssh git@github.com ??? why that works
-# whatever anyway it works
-$env.__NV_DISABLE_EXPLICIT_SYNC = 1
+check-install-and-then "ghcup" { ||
+  path add "~/.ghcup/bin/"
+}
 
+check-install-and-then "elan" { ||
+  path add "~/.elan/bin/"
+}
 
 
 # zoxide
-source ~/.zoxide.nu
 # source $"($nu.cache-dir)/carapace.nu"
 
 
 def cs [x: string] {
   curl $"cheat.sh/($x)"
 }
-
-mkdir ($nu.data-dir | path join "vendor/autoload")
-tv init nu | save -f ($nu.data-dir | path join "vendor/autoload/tv.nu")
-
-
+#
+# mkdir ($nu.data-dir | path join "vendor/autoload")
+# tv init nu | save -f ($nu.data-dir | path join "vendor/autoload/tv.nu")
+#
