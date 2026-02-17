@@ -1,3 +1,19 @@
+
+# tools
+def check-install-and-then [program : string, if_then?: closure, if_fail?: closure] {
+  if ($env.SHLVL >= 2) {return ;}
+  if (which $program | is-empty ) {
+    print -e $"(ansi red)<!> (ansi green)($program)(ansi yellow) is not installed(ansi reset)"
+    if ($if_fail != null) {
+      do $if_fail
+    }
+  } else {
+    do $if_then
+  }
+}
+
+
+# envs
 $env.config.show_banner = false
 
 $env.PROMPT_COMMAND = {||
@@ -61,16 +77,6 @@ def --env y [...args] {
 }
 
 
-
-def check-install-and-then [program : string, if_then?: closure, if_fail?: closure] {
-  if (which $program | is-empty ) {
-    print -e $"(ansi red)<!> (ansi green)($program)(ansi yellow) is not installed(ansi reset)"
-    do $if_fail
-  } else {
-    do $if_then
-  }
-}
-
 check-install-and-then "opam" { ||
   opam env --shell=powershell | parse "$env:{key} = '{val}'" | transpose -rd | load-env
   path add "~/.opam/default/bin/"
@@ -88,9 +94,6 @@ check-install-and-then "elan" { ||
   path add "~/.elan/bin/"
 }
 
-
-# zoxide
-# source $"($nu.cache-dir)/carapace.nu"
 
 
 def cs [x: string] {
